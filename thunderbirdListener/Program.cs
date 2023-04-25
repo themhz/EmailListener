@@ -31,16 +31,16 @@ class Program
     }
 
 
-
     private static async Task ReadEmailsAsync(IConfiguration config)
     {
         // Read email credentials and IMAP settings from the configuration
         string email = config["Email"];
-        string password = config["Password"]; //To Create application specific password go https://myaccount.google.com/apppasswords
+        string password = config["Password"];
         string imapServer = config["ImapServer"];
         int imapPort = int.Parse(config["ImapPort"]);
 
-        Console.WriteLine($"2.Program started waiting for order...");
+        Console.WriteLine("3.Program started waiting for order...");
+
         using (var client = new ImapClient())
         {
             // Accept all SSL certificates (not recommended for production)
@@ -59,19 +59,17 @@ class Program
             int lastProcessedMessage = inbox.Count;
 
             // Monitor the mailbox for new messages
-            while (true)
+            inbox.CountChanged += async (s, e) =>
             {
-                await client.NoOpAsync();
-
                 int currentMessageCount = inbox.Count;
 
                 if (currentMessageCount > lastProcessedMessage)
                 {
                     for (int i = lastProcessedMessage; i < currentMessageCount; i++)
                     {
-                        var message = await inbox.GetMessageAsync(i);                                               
+                        var message = await inbox.GetMessageAsync(i);
 
-                        if(message.From.Mailboxes.FirstOrDefault().Address == "notifications@ecwid.com" && message.Subject.Contains("Comanda"))
+                        if (message.From.Mailboxes.FirstOrDefault().Address == "notifications@ecwid.com" && message.Subject.Contains("Comanda"))
                         {
                             Console.WriteLine($"Message received:");
                             Console.WriteLine($"Subject: {message.Subject}");
@@ -86,8 +84,15 @@ class Program
 
                     lastProcessedMessage = currentMessageCount;
                 }
+            };
 
-                await Task.Delay(TimeSpan.FromSeconds(30));
+            // Start the idle operation
+            using (var cts = new CancellationTokenSource())
+            {
+                while (true)
+                {
+                    await client.IdleAsync(cts.Token, CancellationToken.None);
+                }
             }
         }
     }
