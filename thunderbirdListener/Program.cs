@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using System.Drawing.Printing;
 using MimeKit;
 using System.Drawing;
+using System.Text;
 
 class Program
 {
@@ -35,11 +36,11 @@ class Program
     {
         // Read email credentials and IMAP settings from the configuration
         string email = config["Email"];
-        string password = config["Password"];
+        string password = config["Password"]; //To Create application specific password go https://myaccount.google.com/apppasswords
         string imapServer = config["ImapServer"];
         int imapPort = int.Parse(config["ImapPort"]);
 
-
+        Console.WriteLine($"2.Program started waiting for order...");
         using (var client = new ImapClient())
         {
             // Accept all SSL certificates (not recommended for production)
@@ -99,12 +100,83 @@ class Program
             throw new ArgumentNullException(nameof(message));
         }
 
+        Font printFont = new Font("Arial", 8); // Adjust the font size to fit the paper width
+
+        // Use message.TextBody instead of the subject
+        string[] lines = message.TextBody.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        List<string> wrappedLines = new List<string>();
+
         var printDoc = new PrintDocument();
+
+        using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
+        {
+            foreach (string line in lines)
+            {
+                string wrappedText = WrapText(line, printFont, 295, graphics);
+                wrappedLines.AddRange(wrappedText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
+            }
+        }
+
+        int totalLines = wrappedLines.Count;
+        float lineHeight = printFont.GetHeight();
+        int paperHeight = (int)(totalLines * lineHeight) + 20; // Calculate paper height based on the content
+
+        printDoc.DefaultPageSettings.PaperSize = new PaperSize("Custom", 315, paperHeight); // Set dynamic paper height
+        printDoc.DefaultPageSettings.Margins = new Margins(10, 10, 10, 10);
+
         printDoc.PrintPage += (s, e) =>
         {
-            e.Graphics.DrawString(message.TextBody, SystemFonts.DefaultFont, Brushes.Black, e.MarginBounds.Left, e.MarginBounds.Top, StringFormat.GenericTypographic);
+            float y = e.MarginBounds.Top;
+
+            for (int i = 0; i < wrappedLines.Count; i++)
+            {
+                e.Graphics.DrawString(wrappedLines[i], printFont, Brushes.Black, e.MarginBounds.Left, y, StringFormat.GenericTypographic);
+                y += lineHeight;
+            }
+
             e.HasMorePages = false;
         };
+
         printDoc.Print();
     }
+
+
+
+    private static string WrapText(string text, Font font, float maxWidth, Graphics graphics)
+    {
+        string[] words = text.Split(' ');
+        StringBuilder wrappedText = new StringBuilder();
+        StringBuilder currentLine = new StringBuilder();
+
+        foreach (string word in words)
+        {
+            string testLine = currentLine.Length == 0 ? word : currentLine.ToString() + " " + word;
+            float testLineWidth = graphics.MeasureString(testLine, font).Width;
+
+            if (testLineWidth > maxWidth)
+            {
+                if (currentLine.Length > 0)
+                {
+                    wrappedText.AppendLine(currentLine.ToString());
+                    currentLine.Clear();
+                }
+            }
+            else
+            {
+                if (currentLine.Length > 0)
+                {
+                    currentLine.Append(" ");
+                }
+            }
+            currentLine.Append(word);
+        }
+
+        if (currentLine.Length > 0)
+        {
+            wrappedText.AppendLine(currentLine.ToString());
+        }
+
+        return wrappedText.ToString();
+    }
+
 }
