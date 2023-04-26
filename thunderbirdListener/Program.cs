@@ -9,6 +9,8 @@ using System.Drawing.Printing;
 using MimeKit;
 using System.Drawing;
 using System.Text;
+using MailKit.Search;
+using Serilog;
 
 class Program
 {
@@ -33,13 +35,24 @@ class Program
 
     private static async Task ReadEmailsAsync(IConfiguration config)
     {
+        string basePath = AppDomain.CurrentDomain.BaseDirectory;        
+        string logFilePath = Path.Combine(basePath, "log.txt");
+
+        Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Debug()
+        .WriteTo.Console()
+        .WriteTo.File(logFilePath)
+        .CreateLogger();
+
         // Read email credentials and IMAP settings from the configuration
         string email = config["Email"];
         string password = config["Password"];
         string imapServer = config["ImapServer"];
         int imapPort = int.Parse(config["ImapPort"]);
 
-        Console.WriteLine("3.Program started waiting for order...");
+        Console.WriteLine(".Program started waiting for order...");
+
+        DateTimeOffset lastProcessedMessageDate = DateTimeOffset.Now.AddDays(-1);
 
         using (var client = new ImapClient())
         {
@@ -54,48 +67,54 @@ class Program
 
             // Open the Inbox folder
             var inbox = client.Inbox;
-            await inbox.OpenAsync(FolderAccess.ReadOnly);
-
-            int lastProcessedMessage = inbox.Count;
+            await inbox.OpenAsync(FolderAccess.ReadWrite);
 
             // Monitor the mailbox for new messages
-            inbox.CountChanged += async (s, e) =>
+            while (true)
             {
-                int currentMessageCount = inbox.Count;
+                // Wait for one minute before checking for new messages
+                //await Task.Delay(TimeSpan.FromMinutes(1));
+                await Task.Delay(TimeSpan.FromSeconds(30));
 
-                if (currentMessageCount > lastProcessedMessage)
+                // Search for messages received after the last processed message date
+                var query = SearchQuery.And(
+                    SearchQuery.DeliveredAfter(lastProcessedMessageDate.DateTime),
+                    SearchQuery.NotSeen
+                );
+
+                var newMessages = await inbox.SearchAsync(query);
+
+                foreach (var uid in newMessages)
                 {
-                    for (int i = lastProcessedMessage; i < currentMessageCount; i++)
+                    var message = await inbox.GetMessageAsync(uid);
+
+                    if (message.From.Mailboxes.FirstOrDefault().Address == "themhz@gmail.com" && message.Subject.Contains("Comanda"))
                     {
-                        var message = await inbox.GetMessageAsync(i);
+                        Log.Information($"Message received at: {DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}");
+                        Log.Information($"Subject: {message.Subject}");
+                        Log.Information($"From: {message.From}");
+                        Log.Information($"Date: {message.Date}");
+                        Log.Information($"Body: {message.TextBody}");
+                        Log.Information("-------------------------");
 
-                        if (message.From.Mailboxes.FirstOrDefault().Address == "notifications@ecwid.com" && message.Subject.Contains("Comanda"))
-                        {
-                            Console.WriteLine($"Message received:");
-                            Console.WriteLine($"Subject: {message.Subject}");
-                            Console.WriteLine($"From: {message.From}");
-                            Console.WriteLine($"Date: {message.Date}");
-                            Console.WriteLine($"Body: {message.TextBody}");
-                            Console.WriteLine("-------------------------");
+                        //PrintMessageBody(message);
 
-                            PrintMessageBody(message);
-                        }
+                        // Mark the message as read
+                        await inbox.SetFlagsAsync(uid, MessageFlags.Seen, true);
+
+                        // Update the last processed message date
+                        lastProcessedMessageDate = message.Date;
                     }
-
-                    lastProcessedMessage = currentMessageCount;
-                }
-            };
-
-            // Start the idle operation
-            using (var cts = new CancellationTokenSource())
-            {
-                while (true)
-                {
-                    await client.IdleAsync(cts.Token, CancellationToken.None);
                 }
             }
         }
     }
+
+
+
+
+
+
 
 
     public static void PrintMessageBody(MimeMessage message)
