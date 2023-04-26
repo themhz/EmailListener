@@ -58,7 +58,7 @@ namespace thunderbirdListener
             string imapServer = config["ImapServer"];
             int imapPort = int.Parse(config["ImapPort"]);
 
-            Log.Information(".Program started waiting for order...");
+            Log.Information("1.Program started waiting for order...");
 
             DateTimeOffset lastProcessedMessageDate = DateTimeOffset.Now.AddDays(-1);
 
@@ -68,7 +68,7 @@ namespace thunderbirdListener
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
                 // Connect to the IMAP server
-                await client.ConnectAsync(imapServer, imapPort, true);
+                await client.ConnectAsync(imapServer, imapPort, true);                
 
                 // Authenticate with the server
                 await client.AuthenticateAsync(email, password);
@@ -82,21 +82,29 @@ namespace thunderbirdListener
                 {
                     // Wait for one minute before checking for new messages
                     //await Task.Delay(TimeSpan.FromMinutes(1));
-                    await Task.Delay(TimeSpan.FromSeconds(30));
-
+                    await Task.Delay(TimeSpan.FromSeconds(20));
+                    Log.Information("await Task.Delay(TimeSpan.FromSeconds(20));");
                     // Search for messages received after the last processed message date
+                    //var query = SearchQuery.And(
+                    //    SearchQuery.DeliveredAfter(lastProcessedMessageDate.DateTime),
+                    //    SearchQuery.NotSeen
+                    //);
+
                     var query = SearchQuery.And(
                         SearchQuery.DeliveredAfter(lastProcessedMessageDate.DateTime),
                         SearchQuery.NotSeen
                     );
 
+                    await client.NoOpAsync();
                     var newMessages = await inbox.SearchAsync(query);
+
+                    Log.Information($"Reading messages {newMessages.Count}");
 
                     foreach (var uid in newMessages)
                     {
                         var message = await inbox.GetMessageAsync(uid);
 
-                        if (message.From.Mailboxes.FirstOrDefault().Address == "themhz@gmail.com" && message.Subject.Contains("Comanda"))
+                        if (message.From.Mailboxes.FirstOrDefault().Address == "notifications@ecwid.com" && message.Subject.Contains("Comanda"))
                         {
                             Log.Information($"Message received at: {DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}");
                             Log.Information($"Subject: {message.Subject}");
@@ -105,7 +113,7 @@ namespace thunderbirdListener
                             Log.Information($"Body: {message.TextBody}");
                             Log.Information("-------------------------");
 
-                            //PrintMessageBody(message);
+                            PrintMessageBody(message);
 
                             // Mark the message as read
                             await inbox.SetFlagsAsync(uid, MessageFlags.Seen, true);
@@ -114,12 +122,9 @@ namespace thunderbirdListener
                             lastProcessedMessageDate = message.Date;
                         }
                     }
-
-                    if (startProcess == 0)
-                        break;
+                    
                 }
-
-                await inbox.CloseAsync();
+                
             }
         }
 

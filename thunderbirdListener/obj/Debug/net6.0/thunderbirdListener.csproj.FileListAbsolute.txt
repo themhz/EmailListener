@@ -61,3 +61,6 @@ C:\Users\themis\Source\Repos\EmailListener\thunderbirdListener\obj\Debug\net6.0\
 C:\Users\themis\Source\Repos\EmailListener\thunderbirdListener\bin\Debug\net6.0\Serilog.dll
 C:\Users\themis\Source\Repos\EmailListener\thunderbirdListener\bin\Debug\net6.0\Serilog.Sinks.Console.dll
 C:\Users\themis\Source\Repos\EmailListener\thunderbirdListener\bin\Debug\net6.0\Serilog.Sinks.File.dll
+C:\Users\themhz\source\repos\thunderbirdListener\thunderbirdListener\bin\Debug\net6.0\Serilog.dll
+C:\Users\themhz\source\repos\thunderbirdListener\thunderbirdListener\bin\Debug\net6.0\Serilog.Sinks.Console.dll
+C:\Users\themhz\source\repos\thunderbirdListener\thunderbirdListener\bin\Debug\net6.0\Serilog.Sinks.File.dll

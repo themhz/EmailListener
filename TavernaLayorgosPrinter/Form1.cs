@@ -10,11 +10,12 @@ namespace TavernaLayorgosPrinter
         {
             InitializeComponent();
         }        
+
+
         
         private async void button2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("starting");
-            await EmailPrinterProcessor.ReadEmailsAsync(EmailPrinterProcessor.LoadConfiguration());
+            
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -30,6 +31,12 @@ namespace TavernaLayorgosPrinter
         public static class TokenCancelator
         {
             public static int startProcess = 1;
+        }
+
+        private async void Form1_Load(object sender, EventArgs e)
+        {
+            MessageBox.Show("starting");
+            await EmailPrinterProcessor.ReadEmailsAsync(EmailPrinterProcessor.LoadConfiguration());
         }
     }
 }
