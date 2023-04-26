@@ -110,13 +110,6 @@ class Program
         }
     }
 
-
-
-
-
-
-
-
     public static void PrintMessageBody(MimeMessage message)
     {
         if (message == null)
