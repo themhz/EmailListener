@@ -19,14 +19,14 @@ using System.Diagnostics;
 
 namespace thunderbirdListener
 {
-    public class EmailPrinterProcessor
+    public static class EmailPrinterProcessor
     {
 
         private static NotifyIcon trayIcon;
         private static ContextMenuStrip trayMenu;
         private static IConfiguration config;
         private static string logFilePath = "log.txt";
-
+        private static LoggerConfiguration loger;
 
         public static IConfiguration LoadConfiguration()
         {
@@ -41,7 +41,7 @@ namespace thunderbirdListener
         }
 
 
-        public static async Task ReadEmailsAsync(IConfiguration config)
+        public static async Task ReadEmailsAsync(IConfiguration config, Panel pnlStatus, TextBox txtStatus)
         {
             string basePath = AppDomain.CurrentDomain.BaseDirectory;
             string logFilePath = Path.Combine(basePath, "log.txt");
@@ -52,6 +52,8 @@ namespace thunderbirdListener
             .WriteTo.File(logFilePath)
             .CreateLogger();
 
+            
+
             // Read email credentials and IMAP settings from the configuration
             string email = config["Email"];
             string password = config["Password"];
@@ -59,7 +61,7 @@ namespace thunderbirdListener
             int imapPort = int.Parse(config["ImapPort"]);
 
             Log.Information("1.Program started waiting for order...");
-
+            txtStatus.Text += "1.Program started waiting for order...\r\n";
             DateTimeOffset lastProcessedMessageDate = DateTimeOffset.Now.AddDays(-1);
 
             using (var client = new ImapClient())
@@ -79,17 +81,10 @@ namespace thunderbirdListener
 
                 // Monitor the mailbox for new messages
                 while (true)
-                {
-                    // Wait for one minute before checking for new messages
-                    //await Task.Delay(TimeSpan.FromMinutes(1));
-                    await Task.Delay(TimeSpan.FromSeconds(20));
+                {                                        
+                    pnlStatus.BackColor = Color.Green;
                     Log.Information("await Task.Delay(TimeSpan.FromSeconds(20));");
-                    // Search for messages received after the last processed message date
-                    //var query = SearchQuery.And(
-                    //    SearchQuery.DeliveredAfter(lastProcessedMessageDate.DateTime),
-                    //    SearchQuery.NotSeen
-                    //);
-
+                    txtStatus.Text += "await Task.Delay(TimeSpan.FromSeconds(20));\r\n";
                     var query = SearchQuery.And(
                         SearchQuery.DeliveredAfter(lastProcessedMessageDate.DateTime),
                         SearchQuery.NotSeen
@@ -99,20 +94,27 @@ namespace thunderbirdListener
                     var newMessages = await inbox.SearchAsync(query);
 
                     Log.Information($"Reading messages {newMessages.Count}");
-
+                    txtStatus.Text += $"Reading messages {newMessages.Count}\r\n";
                     foreach (var uid in newMessages)
                     {
                         var message = await inbox.GetMessageAsync(uid);
 
-                        if (message.From.Mailboxes.FirstOrDefault().Address == "notifications@ecwid.com" && message.Subject.Contains("Comanda"))
+                        if (message.From.Mailboxes.FirstOrDefault().Address == config["MailFromDev"] && message.Subject.Contains("Comanda"))
                         {
                             Log.Information($"Message received at: {DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}");
+                            txtStatus.Text += $"Message received at: {DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}\r\n";
                             Log.Information($"Subject: {message.Subject}");
+                            txtStatus.Text += $"Subject: {message.Subject}\r\n";
                             Log.Information($"From: {message.From}");
+                            txtStatus.Text += $"From: {message.From} \r\n";
                             Log.Information($"Date: {message.Date}");
+                            txtStatus.Text += $"Date: {message.Date} \r\n";
                             Log.Information($"Body: {message.TextBody}");
+                            txtStatus.Text += $"Body: {message.TextBody} \r\n";
                             Log.Information("-------------------------");
+                            txtStatus.Text += "-------------------------\r\n";
 
+                            txtStatus.Text += message.TextBody;
                             PrintMessageBody(message);
 
                             // Mark the message as read
@@ -122,12 +124,16 @@ namespace thunderbirdListener
                             lastProcessedMessageDate = message.Date;
                         }
                     }
-                    
+
+                    pnlStatus.BackColor = Color.White;
+                    // Wait for one minute before checking for new messages
+                    //await Task.Delay(TimeSpan.FromMinutes(1));
+                    await Task.Delay(TimeSpan.FromSeconds(20));
                 }
                 
             }
         }
-
+        
         public static void PrintMessageBody(MimeMessage message)
         {
             if (message == null)

@@ -34,9 +34,8 @@ namespace TavernaLayorgosPrinter
         }
 
         private async void Form1_Load(object sender, EventArgs e)
-        {
-            MessageBox.Show("starting");
-            await EmailPrinterProcessor.ReadEmailsAsync(EmailPrinterProcessor.LoadConfiguration());
+        {            
+            await EmailPrinterProcessor.ReadEmailsAsync(EmailPrinterProcessor.LoadConfiguration(), pnlStatus, txtStatus);
         }
     }
 }
