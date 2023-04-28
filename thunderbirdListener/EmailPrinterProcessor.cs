@@ -61,7 +61,7 @@ namespace thunderbirdListener
             int imapPort = int.Parse(config["ImapPort"]);
 
             Log.Information("1.Program started waiting for order...");
-            txtStatus.Text += "1.Program started waiting for order...\r\n";
+            txtStatus.Text = "1.Program started waiting for order...\r\n" + txtStatus.Text;
             DateTimeOffset lastProcessedMessageDate = DateTimeOffset.Now.AddDays(-1);
 
             using (var client = new ImapClient())
@@ -84,7 +84,7 @@ namespace thunderbirdListener
                 {                                        
                     pnlStatus.BackColor = Color.Green;
                     Log.Information("await Task.Delay(TimeSpan.FromSeconds(20));");
-                    txtStatus.Text += "await Task.Delay(TimeSpan.FromSeconds(20));\r\n";
+                    txtStatus.Text = "await Task.Delay(TimeSpan.FromSeconds(20));\r\n" + txtStatus.Text;
                     var query = SearchQuery.And(
                         SearchQuery.DeliveredAfter(lastProcessedMessageDate.DateTime),
                         SearchQuery.NotSeen
@@ -94,7 +94,7 @@ namespace thunderbirdListener
                     var newMessages = await inbox.SearchAsync(query);
 
                     Log.Information($"Reading messages {newMessages.Count}");
-                    txtStatus.Text += $"Reading messages {newMessages.Count}\r\n";
+                    txtStatus.Text = $"Reading messages {newMessages.Count}\r\n" + txtStatus.Text;
                     foreach (var uid in newMessages)
                     {
                         var message = await inbox.GetMessageAsync(uid);
@@ -102,17 +102,17 @@ namespace thunderbirdListener
                         if (message.From.Mailboxes.FirstOrDefault().Address == config["MailFromDev"] && message.Subject.Contains("Comanda"))
                         {
                             Log.Information($"Message received at: {DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}");
-                            txtStatus.Text += $"Message received at: {DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}\r\n";
+                            txtStatus.Text = $"Message received at: {DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}\r\n" + txtStatus.Text;
                             Log.Information($"Subject: {message.Subject}");
-                            txtStatus.Text += $"Subject: {message.Subject}\r\n";
+                            txtStatus.Text = $"Subject: {message.Subject}\r\n" + txtStatus.Text;
                             Log.Information($"From: {message.From}");
-                            txtStatus.Text += $"From: {message.From} \r\n";
+                            txtStatus.Text = $"From: {message.From} \r\n" + txtStatus.Text;
                             Log.Information($"Date: {message.Date}");
-                            txtStatus.Text += $"Date: {message.Date} \r\n";
+                            txtStatus.Text = $"Date: {message.Date} \r\n" + txtStatus.Text;
                             Log.Information($"Body: {message.TextBody}");
-                            txtStatus.Text += $"Body: {message.TextBody} \r\n";
+                            txtStatus.Text = $"Body: {message.TextBody} \r\n" + txtStatus.Text;
                             Log.Information("-------------------------");
-                            txtStatus.Text += "-------------------------\r\n";
+                            txtStatus.Text = "-------------------------\r\n" + txtStatus.Text;
 
                             txtStatus.Text += message.TextBody;
                             PrintMessageBody(message);
@@ -133,7 +133,7 @@ namespace thunderbirdListener
                 
             }
         }
-        
+
         public static void PrintMessageBody(MimeMessage message)
         {
             if (message == null)
@@ -141,37 +141,40 @@ namespace thunderbirdListener
                 throw new ArgumentNullException(nameof(message));
             }
 
-            Font printFont = new Font("Arial", 8); // Adjust the font size to fit the paper width
+            Font printFont = new Font("Arial", 12);
+            Font boldFont = new Font("Arial", 14, FontStyle.Bold); // Increase font size for the bold text
 
-            // Use message.TextBody instead of the subject
             string[] lines = message.TextBody.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
             List<string> wrappedLines = new List<string>();
 
             var printDoc = new PrintDocument();
 
+            int paperWidth = (int)(80 * 3.937);
+
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
             {
                 foreach (string line in lines)
                 {
-                    string wrappedText = WrapText(line, printFont, 295, graphics);
+                    string wrappedText = WrapText(line, printFont, paperWidth - 40, graphics);
                     wrappedLines.AddRange(wrappedText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
                 }
             }
 
             int totalLines = wrappedLines.Count;
             float lineHeight = printFont.GetHeight();
-            int paperHeight = (int)(totalLines * lineHeight) + 20; // Calculate paper height based on the content
+            int paperHeight = (int)(totalLines * lineHeight) + 20;
 
-            printDoc.DefaultPageSettings.PaperSize = new PaperSize("Custom", 315, paperHeight); // Set dynamic paper height
+            printDoc.DefaultPageSettings.PaperSize = new PaperSize("Custom", paperWidth, paperHeight);
             printDoc.DefaultPageSettings.Margins = new Margins(10, 10, 10, 10);
 
             printDoc.PrintPage += (s, e) =>
             {
-                float y = e.MarginBounds.Top;
+                float y = e.MarginBounds.Top + 48; // Add 48 to move the text down by 2 inches (1 inch = 24 points)
 
                 for (int i = 0; i < wrappedLines.Count; i++)
                 {
-                    e.Graphics.DrawString(wrappedLines[i], printFont, Brushes.Black, e.MarginBounds.Left, y, StringFormat.GenericTypographic);
+                    Font currentFont = wrappedLines[i].Contains("Taverna La Yorgo's") ? boldFont : printFont;
+                    e.Graphics.DrawString(wrappedLines[i], currentFont, Brushes.Black, e.MarginBounds.Left, y, StringFormat.GenericTypographic);
                     y += lineHeight;
                 }
 
@@ -180,6 +183,9 @@ namespace thunderbirdListener
 
             printDoc.Print();
         }
+
+
+
         public static string WrapText(string text, Font font, float maxWidth, Graphics graphics)
         {
             string[] words = text.Split(' ');

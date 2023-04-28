@@ -66,3 +66,43 @@
 2023-04-27 17:56:25.453 +03:00 [INF] 1.Program started waiting for order...
 2023-04-27 17:56:27.920 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
 2023-04-27 17:56:28.361 +03:00 [INF] Reading messages 55
+2023-04-27 19:47:14.393 +03:00 [INF] 1.Program started waiting for order...
+2023-04-27 19:47:17.252 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:47:17.706 +03:00 [INF] Reading messages 55
+2023-04-27 19:47:50.098 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:47:50.484 +03:00 [INF] Reading messages 55
+2023-04-27 19:48:22.181 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:48:22.582 +03:00 [INF] Reading messages 55
+2023-04-27 19:48:54.431 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:48:54.906 +03:00 [INF] Reading messages 55
+2023-04-27 19:49:26.983 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:49:27.378 +03:00 [INF] Reading messages 55
+2023-04-27 19:49:59.016 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:49:59.457 +03:00 [INF] Reading messages 55
+2023-04-27 19:50:31.105 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:50:31.506 +03:00 [INF] Reading messages 55
+2023-04-27 19:51:03.256 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:51:03.657 +03:00 [INF] Reading messages 55
+2023-04-27 19:51:35.265 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:51:35.658 +03:00 [INF] Reading messages 55
+2023-04-27 19:52:07.368 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:52:07.756 +03:00 [INF] Reading messages 55
+2023-04-27 19:52:39.356 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:52:39.760 +03:00 [INF] Reading messages 55
+2023-04-27 19:53:11.324 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:53:11.720 +03:00 [INF] Reading messages 55
+2023-04-27 19:53:43.178 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:53:43.569 +03:00 [INF] Reading messages 55
+2023-04-27 19:54:15.333 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:54:15.738 +03:00 [INF] Reading messages 55
+2023-04-27 19:54:47.393 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:54:47.833 +03:00 [INF] Reading messages 55
+2023-04-27 19:55:19.672 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:55:20.059 +03:00 [INF] Reading messages 55
+2023-04-27 19:55:51.742 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:55:52.132 +03:00 [INF] Reading messages 55
+2023-04-27 19:56:22.496 +03:00 [INF] 1.Program started waiting for order...
+2023-04-27 19:56:24.923 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:56:25.296 +03:00 [INF] Reading messages 55
+2023-04-27 19:56:56.207 +03:00 [INF] await Task.Delay(TimeSpan.FromSeconds(20));
+2023-04-27 19:56:56.617 +03:00 [INF] Reading messages 55

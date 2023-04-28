@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {            
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.txtStatus = new System.Windows.Forms.TextBox();
             this.pnlStatus = new System.Windows.Forms.Panel();
+            this.txtStatus = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -53,15 +53,6 @@
             this.splitContainer1.SplitterDistance = 265;
             this.splitContainer1.TabIndex = 2;
             // 
-            // txtStatus
-            // 
-            this.txtStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtStatus.Location = new System.Drawing.Point(0, 0);
-            this.txtStatus.Multiline = true;
-            this.txtStatus.Name = "txtStatus";
-            this.txtStatus.Size = new System.Drawing.Size(528, 448);
-            this.txtStatus.TabIndex = 2;
-            // 
             // pnlStatus
             // 
             this.pnlStatus.BackColor = System.Drawing.Color.White;
@@ -69,6 +60,16 @@
             this.pnlStatus.Name = "pnlStatus";
             this.pnlStatus.Size = new System.Drawing.Size(33, 28);
             this.pnlStatus.TabIndex = 1;
+            // 
+            // txtStatus
+            // 
+            this.txtStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtStatus.Location = new System.Drawing.Point(0, 0);
+            this.txtStatus.Multiline = true;
+            this.txtStatus.Name = "txtStatus";
+            this.txtStatus.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtStatus.Size = new System.Drawing.Size(528, 448);
+            this.txtStatus.TabIndex = 2;
             // 
             // Form1
             // 
